@@ -1,17 +1,25 @@
 import "package:flutter/material.dart";
 
-
+//ignore: must_be_immutable
 class ToDoTile extends StatelessWidget {
 
   final String taskName;
+  final String groupName;
+  final int index;
   final bool taskCompleted;
-
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
   Function(bool?)? onChanged;
 
   ToDoTile({super.key,
     required this.taskName,
+    required this.groupName,
+    required this.index,
     required this.taskCompleted,
-    required this.onChanged});
+    required this.onChanged,
+    required this.onDelete,
+    required this.onEdit
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,20 +32,37 @@ class ToDoTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(12.0),
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               //Checkbox
-              Checkbox(value: taskCompleted, onChanged: onChanged),
-              //task name
-              Text(
-                  taskName,
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: "Arial",
-                      color: const Color(0xff222831),
-                      decoration: taskCompleted ? TextDecoration.lineThrough : TextDecoration.none
+              Row(
+                children: [
+                  Checkbox(value: taskCompleted, onChanged: onChanged),
+                  //task name
+                  Text(
+                      "ID: $index \n$taskName \n$groupName",
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: "Arial",
+                          color: const Color(0xff222831),
+                          decoration: taskCompleted ? TextDecoration.lineThrough : TextDecoration.none
+                      )
                   )
+                ],
               ),
+              Row (
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: onEdit, // Call onEdit callback function
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: onDelete, // Call onDelete callback function
+                  )
+                ]
+              )
             ],
           )
       ),

@@ -12,16 +12,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
+  final _groupController = TextEditingController();
 
   // List of tasks :
   List toDoList = [
-    ["Fuck Merey", true],
-    ["Find the internship", false]
+    ["Finish Flutter Lisp App", "SE-2216", true],
+    ["Get 100% Points", "11 A ",false]
   ];
 
   void checkBoxChanged(bool? value, int index) {
     setState(() {
-      toDoList[index][1] = !toDoList[index][1];
+      toDoList[index][2] = !toDoList[index][2];
     });
   }
 
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context) {
           return DialogBox(
             controller: _controller,
+            groupController: _groupController,
             onSave: saveNewTask,
             onCancel: () => Navigator.of(context).pop(),
           );
@@ -41,14 +43,68 @@ class _HomePageState extends State<HomePage> {
 
   void saveNewTask() {
     setState(() {
-      toDoList.add([ _controller.text, false]);
+      toDoList.add([ _controller.text, _groupController.text, false]);
       _controller.clear();
+      _groupController.clear();
     });
     Navigator.of(context).pop();
   }
 
-  void onDelete() {
-    // toDoList.remove()
+  void onDelete(int index) {
+    setState(() {
+      toDoList.removeAt(index); // Remove the task at the specified index
+    });
+  }
+
+  void onDeleteConfirmation(int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Task'),
+          content: const Text('Are you sure you want to delete this task?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                onDelete(index); // Call onDelete if the user confirms
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void onEditTask(int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return DialogBox(
+          controller: _controller,
+          groupController: _groupController,
+          onSave: () => saveEditedTask(index), // Define function to save edited task
+          onCancel: () => Navigator.of(context).pop(),
+        );
+      },
+    );
+  }
+
+  void saveEditedTask(int index) {
+    setState(() {
+      toDoList[index][0] = _controller.text; // Update task name with edited text
+      _controller.clear();
+      toDoList[index][1] = _groupController.text;
+      _groupController.clear();
+    });
+    Navigator.of(context).pop(); // Close the dialog
   }
 
   @override
@@ -83,8 +139,12 @@ class _HomePageState extends State<HomePage> {
           itemBuilder: (context, index){
             return ToDoTile(
                 taskName: toDoList[index][0],
-                taskCompleted: toDoList[index][1],
+                groupName: toDoList[index][1],
+                taskCompleted: toDoList[index][2],
+                index: index + 1,
                 onChanged: (value) => checkBoxChanged(value, index),
+                onDelete: () => onDeleteConfirmation(index),
+                onEdit: () => onEditTask(index),
             );
           },
         )
